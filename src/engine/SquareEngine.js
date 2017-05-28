@@ -36,9 +36,6 @@ class SquareEngine {
         this.canvas.fillStyle = "#00f";
         this.context = this.canvas.getContext('2d');
 
-        // Prepare game loop context data
-        this.drawContext = new SquareDrawContext();
-
         // Bind resolution change data
         this.resolution = {
             w: 0,
@@ -50,6 +47,13 @@ class SquareEngine {
         });
 
         SquareEngine.updateResolution();
+
+        // Prepare game loop context data
+        this.drawContext = new SquareDrawContext();
+        this.updateContext = new SquareUpdateContext();
+
+        // Initialize core components
+        this.stage = new SquareStage();
 
         // Start the game loop
         SquareEngine.loop();
@@ -69,9 +73,12 @@ class SquareEngine {
 
     /**
      * Game loop main update method.
+     *
+     * @param {SquareUpdateContext} updateContext
      */
-    static update() {
-
+    static update(updateContext) {
+        // Update the stage, which is where the game lives
+        this.stage.update(updateContext);
     }
 
     /**
@@ -80,9 +87,16 @@ class SquareEngine {
      * @param {SquareDrawContext} drawContext
      */
     static draw(drawContext) {
+        // Clear the frame
         drawContext.context.clearRect(0, 0, drawContext.resolution.w, drawContext.resolution.h);
-        drawContext.context.fillStyle = "#fff";
-        drawContext.context.fillText(SquareDiagnostics.fpsResult + " / " + SquareDiagnostics.frameCounter, 15, 15);
+
+        // Draw res / fps diag stuff
+        drawContext.context.fillStyle = "#f0f";
+        drawContext.context.fillText(this.resolution.w + "x" + this.resolution.h + " / " + SquareDiagnostics.fpsResult
+            + " / " + SquareDiagnostics.frameCounter, 15, 15);
+
+        // Draw the stage, which is where the game lives
+        this.stage.draw(drawContext);
     }
 
     /**
@@ -98,9 +112,6 @@ class SquareEngine {
         // We blindly match the scaled CSS size of the element
         this.canvas.width = this.resolution.w;
         this.canvas.height = this.resolution.h;
-
-        // Sync context data
-        this.drawContext.resolution = this.resolution;
 
         SquareDiagnostics.logMessage('Canvas resolution set to:', this.resolution);
     }
