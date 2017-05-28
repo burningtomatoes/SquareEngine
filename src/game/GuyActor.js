@@ -1,10 +1,12 @@
 class GuyActor extends SquareActor {
     constructor() {
         super();
+
+        this.velocity.x = .25;
     }
 
-    draw (context) {
-        context.context.fillStyle = '#fff';
-        context.context.fillRect(128, 128, 32, 32);
+    draw(d) {
+        d.context.fillStyle = '#fff';
+        d.context.fillRect(this.drawPosition.x, this.drawPosition.y, 32, 32);
     }
 }

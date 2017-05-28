@@ -11,5 +11,17 @@ class SquareActor extends SquareObject {
 
         this.id = null;
         this.zLayer = 0;
+
+        this.position = new SquareCoordinate(0, 0);
+        this.drawPosition = new SquareCoordinate(0, 0);
+        this.velocity = new SquareCoordinate(0, 0);
+    }
+
+    update(u) {
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+
+        this.drawPosition.x = Math.round(this.position.x);
+        this.drawPosition.y = Math.round(this.position.y);
     }
 }
