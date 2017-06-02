@@ -63,7 +63,7 @@ class SquareEngine {
      * Performs the main game loop.
      */
     static loop() {
-        SquareEngine.update();
+        SquareEngine.update(SquareEngine.updateContext);
         SquareEngine.draw(SquareEngine.drawContext);
 
         SquareDiagnostics.frameEnd();
