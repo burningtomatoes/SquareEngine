@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    SquareDiagnostics.enableDebug();
+    // SquareDiagnostics.enableDebug();
 
     SquareEngine.setFrameRateTarget(30);
     SquareEngine.start('game');
@@ -11,4 +11,8 @@ $(document).ready(function () {
     for (let i = 0; i < 333; i++) {
         SquareEngine.stage.addActor(new GuyActor());
     }
+
+    let ourPlayer = SquareEngine.stage.getActorById(321);
+    SquareEngine.camera.attachTo(ourPlayer);
+    ourPlayer.isPlayer = true;
 });

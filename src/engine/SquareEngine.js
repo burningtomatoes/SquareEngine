@@ -37,10 +37,7 @@ class SquareEngine {
         this.context = this.canvas.getContext('2d');
 
         // Bind resolution change data
-        this.resolution = {
-            w: 0,
-            h: 0
-        };
+        this.resolution = new SquareCoordinate(0, 0);
 
         $(window).resize(function () {
             SquareEngine.updateResolution();
@@ -138,7 +135,7 @@ class SquareEngine {
      */
     static draw(d) {
         // Clear the frame
-        d.context.clearRect(0, 0, d.resolution.w, d.resolution.h);
+        d.context.clearRect(0, 0, d.resolution.x, d.resolution.y);
 
         // Apply camera translation, draw the game stage, and undo the translation
         this.camera.translateContext(d.context);
@@ -157,13 +154,13 @@ class SquareEngine {
      */
     static updateResolution() {
         // Use jQuery to calculate canvas size in the DOM (all available space)
-        this.resolution.w = this.$canvas.outerWidth();
-        this.resolution.h = this.$canvas.outerHeight();
+        this.resolution.x = this.$canvas.outerWidth();
+        this.resolution.y = this.$canvas.outerHeight();
 
         // Sync that info the the actual <canvas> element so it knows what rez to render at
         // We blindly match the scaled CSS size of the element
-        this.canvas.width = this.resolution.w;
-        this.canvas.height = this.resolution.h;
+        this.canvas.width = this.resolution.x;
+        this.canvas.height = this.resolution.y;
 
         SquareDiagnostics.logMessage('Canvas resolution set to:', this.resolution);
     }

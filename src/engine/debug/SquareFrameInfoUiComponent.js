@@ -8,7 +8,7 @@ class SquareFrameInfoUiComponent extends SquareUiComponent {
     update(u) {
         this.delta = u.delta.toFixed(0);
 
-        this.text = u.resolution.w + "x" + u.resolution.h + " / " + SquareDiagnostics.fpsResult
+        this.text = u.resolution.x + "x" + u.resolution.y + " / " + SquareDiagnostics.fpsResult
             + " FPS / " + this.delta + " ms";
 
         if (SquareDiagnostics.fpsSkippedResult > 0) {
