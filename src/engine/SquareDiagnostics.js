@@ -4,7 +4,23 @@ const SEVERITY_WARNING = 1;
 const SEVERITY_ERROR = 2;
 
 class SquareDiagnostics {
+    static enableDebug() {
+        this._debugEnabled = true;
+    }
+
+    static disableDebug() {
+        this._debugEnabled = false;
+    }
+
+    static get debugEnabled() {
+        return this._debugEnabled;
+    }
+
     static frameEnd() {
+        if (!this.debugEnabled) {
+            return;
+        }
+
         let now = new Date().getTime();
 
         if (!this.fpsTime) {
@@ -25,7 +41,7 @@ class SquareDiagnostics {
     }
 
     static logDebug(message, extra) {
-        this.logMessage(message, extra, SEVERITY_INFO);
+        this.logMessage(message, extra, SEVERITY_DEBUG);
     }
 
     static logWarning(message, extra) {
@@ -42,6 +58,10 @@ class SquareDiagnostics {
     }
 
     static logMessage(message, extra, severity) {
+        if (severity === SEVERITY_DEBUG && !this.debugEnabled) {
+            return;
+        }
+
         if (!extra) {
             extra = '';
         }
