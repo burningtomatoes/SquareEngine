@@ -33,6 +33,18 @@ class SquareStage extends SquareObject {
     }
 
     /**
+     * Attempts to remove an actor by its stage ID.
+     *
+     * @param id
+     */
+    removeActorById(id) {
+        if (typeof this.actors[id] !== 'undefined') {
+            this.actors[id].id = null;
+            delete this.actors[id];
+        }
+    }
+
+    /**
      * Adds an actor to the stage.
      * An ID will be generated and attached to the object.
      *

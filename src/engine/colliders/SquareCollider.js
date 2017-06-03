@@ -75,7 +75,10 @@ class SquareCollider extends SquareObject {
         this.rect.h = this.size.y;
 
         // If we receive collision, check for collision state
+        let wasColliding = this.colliding;
+
         this.colliding = false;
+        this.didCollide = false;
         this.collidingWith = [];
 
         if (this.receivesCollision) {
@@ -92,6 +95,11 @@ class SquareCollider extends SquareObject {
 
                 if (counterCollider.collidesWith(this)) {
                     this.colliding = true;
+
+                    if (!wasColliding) {
+                        this.didCollide = true;
+                    }
+
                     this.collidingWith.push(counterActor);
 
                     let fastestActorX;

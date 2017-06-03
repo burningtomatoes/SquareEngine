@@ -61,8 +61,12 @@ class GuyActor extends SquareActor {
 
         this.collider.update(u);
 
-        if (this.collider.colliding && this.isPlayer) {
+        if (this.collider.didCollide && this.isPlayer) {
             SquareEngine.camera.rumble(SquareEngine.frameRateTarget / 10, 10);
+        }
+
+        if (this.collider.didCollide) {
+            this.emitParticles(10);
         }
     }
 

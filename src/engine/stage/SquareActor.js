@@ -23,6 +23,32 @@ class SquareActor extends SquareObject {
     }
 
     /**
+     * Quickly apply a simple particle effect on this actor (ex. blood splatter on impact, etc).
+     *
+     * A new particle emitter will be added to the stage, and it will be attached to this actor.
+     * After the emitter is done, it will be destroyed automatically.
+     *
+     * @param {number} runtime The amount of frames this emitter should run for.
+     */
+    emitParticles(runtime) {
+        let emitter = new SquareParticleEmitter();
+        emitter.position = this.position;
+        emitter.emitterRemoveOnStop = true;
+        emitter.emitterRuntime = runtime;
+        SquareEngine.stage.addActor(emitter);
+        emitter.start();
+    }
+
+    /**
+     * Attempt to remove the actor from the stage.
+     */
+    remove() {
+        if (this.id) {
+            SquareEngine.stage.removeActorById(this.id);
+        }
+    }
+
+    /**
      * Updates the actor.
      *
      * @param {SquareUpdateContext} u

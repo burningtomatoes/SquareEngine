@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 separator: ';'
             },
             js: {
-                src: ['src/engine/*.js', 'src/bootstrap.js', 'src/**/*.js'],
+                src: ['src/engine/*.js', 'src/engine/stage/*.js', 'src/bootstrap.js', 'src/**/*.js'],
                 dest: 'dist/<%= pkg.name %>.es6.js'
             }
         },
