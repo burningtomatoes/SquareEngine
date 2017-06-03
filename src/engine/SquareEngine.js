@@ -55,6 +55,10 @@ class SquareEngine {
         this.drawContext = new SquareDrawContext();
         this.updateContext = new SquareUpdateContext();
 
+        if (!this.uiComponents) {
+            this.uiComponents = [];
+        }
+
         // Initialize core components
         this.stage = new SquareStage();
 
@@ -83,6 +87,11 @@ class SquareEngine {
         // Update camera
         this.camera.update(u);
 
+        // Update UI components
+        for (let i = 0; i < this.uiComponents.length; i++) {
+            this.uiComponents[i].update(u);
+        }
+
         // Update the stage, which is where the game lives
         this.stage.update(u);
     }
@@ -96,10 +105,10 @@ class SquareEngine {
         // Clear the frame
         d.context.clearRect(0, 0, d.resolution.w, d.resolution.h);
 
-        // Draw res / fps diag stuff
-        d.context.fillStyle = "#f0f";
-        d.context.fillText(this.resolution.w + "x" + this.resolution.h + " / " + SquareDiagnostics.fpsResult
-            + " / " + SquareDiagnostics.frameCounter, 15, 15);
+        // Draw UI components
+        for (let i = 0; i < this.uiComponents.length; i++) {
+            this.uiComponents[i].draw(d);
+        }
 
         // Apply camera translation, draw the game stage, and undo the translation
         this.camera.translateContext(d.context);
@@ -122,5 +131,21 @@ class SquareEngine {
         this.canvas.height = this.resolution.h;
 
         SquareDiagnostics.logMessage('Canvas resolution set to:', this.resolution);
+    }
+
+    /**
+     * @param {SquareUiComponent} uiComponent
+     */
+    static addUiComponent(uiComponent) {
+        if (!uiComponent instanceof SquareUiComponent) {
+            console.warn('addUiComponent() failed: Variable is not an instance of SquareUiComponent class');
+            return;
+        }
+
+        if (!this.uiComponents) {
+            this.uiComponents = [];
+        }
+
+        this.uiComponents.push(uiComponent);
     }
 }
