@@ -23,6 +23,10 @@ class GuyActor extends SquareActor {
     }
 
     draw(d) {
+        if (!this.didInit) {
+            return;
+        }
+
         super.draw(d);
 
         d.context.fillStyle = '#fff';
