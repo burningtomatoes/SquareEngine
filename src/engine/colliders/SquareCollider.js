@@ -91,9 +91,11 @@ class SquareCollider extends SquareObject {
                 }
 
                 if (counterCollider.collidesWith(this)) {
-                    // OH SHIT WE JUST COLLIDED AGAINST ANOTHER ACTOR BLAST OFF MOTHERFUCKER
                     this.colliding = true;
                     this.collidingWith.push(counterActor);
+
+                    counterActor.velocity.x = (-counterActor.velocity.x);
+                    counterActor.velocity.y = (-counterActor.velocity.y);
                 }
             }
         }

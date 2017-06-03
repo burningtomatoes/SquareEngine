@@ -11,14 +11,18 @@ class GuyActor extends SquareActor {
     update(u) {
         super.update(u);
 
-        if (!this.didInit) {
+        while (!this.didInit) {
             this.position.x = SquareMath.rand(-u.resolution.w, u.resolution.w);
             this.position.y = SquareMath.rand(-u.resolution.h, u.resolution.h);
 
             this.velocity.x = SquareMath.rand(-10, +10) / 100;
             this.velocity.y = SquareMath.rand(-10, +10) / 100;
 
-            this.didInit = true;
+            this.collider.update(u);
+
+            if (!this.collider.colliding) {
+                this.didInit = true;
+            }
         }
 
         this.velocity.y += SquareMath.rand(-10, +10) / 1000;
