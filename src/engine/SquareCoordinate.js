@@ -6,4 +6,8 @@ class SquareCoordinate {
         this.x = x;
         this.y = y;
     }
+
+    clone() {
+        return new SquareCoordinate(this.x, this.y);
+    }
 }

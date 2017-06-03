@@ -93,7 +93,7 @@ var PRS$0 = (function(o,t){o["__proto__"]={"a":t};return o["a"]===t})({},{});var
         this._renderX = SquareMath.lerp(this._renderX, this.x, this.speed);
         this._renderY = SquareMath.lerp(this._renderY, this.y, this.speed);
     };
-MIXIN$0(SquareCamera.prototype,proto$0);proto$0=void 0;return SquareCamera;})();;var SquareCoordinate = (function(){"use strict";
+MIXIN$0(SquareCamera.prototype,proto$0);proto$0=void 0;return SquareCamera;})();;var SquareCoordinate = (function(){"use strict";var proto$0={};
     function SquareCoordinate(x, y) {
         if (!x) x = 0;
         if (!y) y = 0;
@@ -101,7 +101,11 @@ MIXIN$0(SquareCamera.prototype,proto$0);proto$0=void 0;return SquareCamera;})();
         this.x = x;
         this.y = y;
     }DP$0(SquareCoordinate,"prototype",{"configurable":false,"enumerable":false,"writable":false});
-;return SquareCoordinate;})();;var SEVERITY_DEBUG = -1;
+
+    proto$0.clone = function() {
+        return new SquareCoordinate(this.x, this.y);
+    };
+MIXIN$0(SquareCoordinate.prototype,proto$0);proto$0=void 0;return SquareCoordinate;})();;var SEVERITY_DEBUG = -1;
 var SEVERITY_INFO = 0;
 var SEVERITY_WARNING = 1;
 var SEVERITY_ERROR = 2;
@@ -528,7 +532,7 @@ var SquareActor = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareActor,
      */
     proto$0.emitParticles = function(runtime) {
         var emitter = new SquareParticleEmitter();
-        emitter.position = this.position;
+        emitter.position = this.position.clone();
         emitter.emitterRemoveOnStop = true;
         emitter.emitterRuntime = runtime;
         SquareEngine.stage.addActor(emitter);
@@ -1122,7 +1126,7 @@ MIXIN$0(SquareKeyboard.prototype,proto$0);proto$0=void 0;return SquareKeyboard;}
     proto$0.update = function(u) {
         super$0.prototype.update.call(this, u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.1);
+        this.size = SquareMath.lerp(this.size, 0, 0.2);
     };
 
     proto$0.draw = function(d) {

@@ -32,7 +32,7 @@ class SquareActor extends SquareObject {
      */
     emitParticles(runtime) {
         let emitter = new SquareParticleEmitter();
-        emitter.position = this.position;
+        emitter.position = this.position.clone();
         emitter.emitterRemoveOnStop = true;
         emitter.emitterRuntime = runtime;
         SquareEngine.stage.addActor(emitter);

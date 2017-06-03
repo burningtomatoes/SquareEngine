@@ -101,6 +101,10 @@ class SquareCamera {
         this.x = x;
         this.y = y;
     }
+
+    clone() {
+        return new SquareCoordinate(this.x, this.y);
+    }
 };const SEVERITY_DEBUG = -1;
 const SEVERITY_INFO = 0;
 const SEVERITY_WARNING = 1;
@@ -528,7 +532,7 @@ class SquareActor extends SquareObject {
      */
     emitParticles(runtime) {
         let emitter = new SquareParticleEmitter();
-        emitter.position = this.position;
+        emitter.position = this.position.clone();
         emitter.emitterRemoveOnStop = true;
         emitter.emitterRuntime = runtime;
         SquareEngine.stage.addActor(emitter);
@@ -1122,7 +1126,7 @@ class SquareCollider extends SquareObject {
     update(u) {
         super.update(u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.1);
+        this.size = SquareMath.lerp(this.size, 0, 0.2);
     }
 
     draw(d) {

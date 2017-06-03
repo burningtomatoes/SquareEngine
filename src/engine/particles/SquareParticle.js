@@ -10,7 +10,7 @@ class SquareParticle extends SquareActor {
     update(u) {
         super.update(u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.1);
+        this.size = SquareMath.lerp(this.size, 0, 0.2);
     }
 
     draw(d) {
