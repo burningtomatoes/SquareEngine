@@ -59,6 +59,10 @@ class SquareEngine {
             this.uiComponents = [];
         }
 
+        if (!this._frameRateTarget) {
+            this.setFrameRateTarget(30);
+        }
+
         // Initialize core components
         this.stage = new SquareStage();
 
@@ -66,16 +70,29 @@ class SquareEngine {
         SquareEngine.loop();
     }
 
+    static setFrameRateTarget(fpsTarget) {
+        this._frameRateTarget = fpsTarget;
+        this._frameInterval = 1000 / this._frameRateTarget;
+        this._frameStartTime = 0;
+    }
+
     /**
      * Performs the main game loop.
      */
     static loop() {
-        SquareEngine.update(SquareEngine.updateContext);
-        SquareEngine.draw(SquareEngine.drawContext);
+        requestAnimationFrame(SquareEngine.loop.bind(this));
 
-        SquareDiagnostics.frameEnd();
+        let now = Date.now();
+        let delta = now - this._frameStartTime;
 
-        requestAnimationFrame(SquareEngine.loop);
+        if (delta >= this._frameInterval) {
+            this._frameStartTime = now - (delta % this._frameInterval);
+
+            SquareEngine.update(SquareEngine.updateContext);
+            SquareEngine.draw(SquareEngine.drawContext);
+
+            SquareDiagnostics.frameEnd();
+        }
     }
 
     /**
