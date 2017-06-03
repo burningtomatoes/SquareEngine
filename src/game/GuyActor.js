@@ -38,8 +38,26 @@ class GuyActor extends SquareActor {
             }
         }
 
-        this.velocity.y += SquareMath.rand(-10, +10) / 1000;
-        this.velocity.x -= SquareMath.rand(-10, +10) / 1000;
+        if (this.isPlayer) {
+            if (SquareEngine.keyboard.keyIsPressed(SquareKeyCode.RIGHT)) {
+                this.velocity.x++;
+            }
+            if (SquareEngine.keyboard.keyIsPressed(SquareKeyCode.LEFT)) {
+                this.velocity.x--;
+            }
+            if (SquareEngine.keyboard.keyIsPressed(SquareKeyCode.DOWN)) {
+                this.velocity.y++;
+            }
+            if (SquareEngine.keyboard.keyIsPressed(SquareKeyCode.UP)) {
+                this.velocity.y--;
+            }
+
+            this.velocity.x = SquareMath.lerp(this.velocity.x, 0, 0.1);
+            this.velocity.y = SquareMath.lerp(this.velocity.y, 0, 0.1);
+        } else {
+            this.velocity.y += SquareMath.rand(-10, +10) / 1000;
+            this.velocity.x -= SquareMath.rand(-10, +10) / 1000;
+        }
 
         this.collider.update(u);
     }
