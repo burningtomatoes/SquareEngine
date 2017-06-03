@@ -7,12 +7,6 @@ class SquareStage extends SquareObject {
 
         this.actorIdGenerator = 0;
         this.actors = {};
-
-        // TEST CODE -- not part of engine
-        for (let i = 0; i < 100; i++) {
-            this.addActor(new GuyActor());
-        }
-        // TEST CODE -- not part of engine
     }
 
     /**
