@@ -86,6 +86,8 @@ class SquareEngine {
         let delta = now - this._frameStartTime;
 
         if (delta >= this._frameInterval) {
+            SquareEngine.updateContext.delta = delta;
+
             this._frameStartTime = now - (delta % this._frameInterval);
 
             SquareEngine.update(SquareEngine.updateContext);
