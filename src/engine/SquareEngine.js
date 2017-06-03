@@ -65,6 +65,7 @@ class SquareEngine {
 
         // Initialize core components
         this.stage = new SquareStage();
+        this.keyboard = new SquareKeyboard();
 
         // Start the game loop
         SquareEngine.loop();
@@ -125,6 +126,9 @@ class SquareEngine {
         for (let i = 0; i < this.uiComponents.length; i++) {
             this.uiComponents[i].update(u);
         }
+
+        // Update input (NB: do this last so "now" and "then" state info is correct for the next frame)
+        this.keyboard.update(u);
     }
 
     /**
