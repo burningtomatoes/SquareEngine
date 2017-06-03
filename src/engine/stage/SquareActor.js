@@ -15,6 +15,11 @@ class SquareActor extends SquareObject {
         this.position = new SquareCoordinate(0, 0);
         this.drawPosition = new SquareCoordinate(0, 0);
         this.velocity = new SquareCoordinate(0, 0);
+
+        /**
+         * @type {SquareCollider|null}
+         */
+        this.collider = null;
     }
 
     /**
@@ -36,6 +41,19 @@ class SquareActor extends SquareObject {
      * @param {SquareDrawContext} d
      */
     draw(d) {
+        // Nothing yet, but we may do some time for debug purposes
+        // Keeping it here to hint to all SquareActor implementors to super call us
+    }
 
+    hasCollider() {
+        return this.collider !== null;
+    }
+
+    givesCollision() {
+        return this.collider && this.collider.givesCollision;
+    }
+
+    receivesCollision() {
+        return this.collider && this.collider.receivesCollision;
     }
 }

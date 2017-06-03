@@ -1,6 +1,6 @@
 class SquareFrameInfoUiComponent extends SquareUiComponent {
     constructor() {
-        super.constructor();
+        super();
 
         this.delta = 0;
     }

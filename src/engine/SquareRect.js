@@ -15,6 +15,22 @@ class SquareRect {
         this.h = h;
     }
 
+    get left() {
+        return this.x;
+    }
+
+    get right() {
+        return this.x + this.w;
+    }
+
+    get top() {
+        return this.y;
+    }
+
+    get bottom() {
+        return this.y + this.h;
+    }
+
     intersects(r2) {
         let r1 = this;
 

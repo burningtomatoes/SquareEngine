@@ -46,23 +46,43 @@ class SquareStage extends SquareObject {
     }
 
     /**
-     * Updates the stage and all of its actors and props.
+     * Gets a list of actors that may be collided with on the stage.
+     * Eligible actors must have a collider attached that is configured to provide collision.
      *
-     * @param {SquareUpdateContext} updateContext
+     * @returns {Array}
      */
-    update(updateContext) {
+    getCollidables() {
+        let list = [];
+
         for (let id in this.actors) {
             let actor = this.actors[id];
-            actor.update(updateContext);
+
+            if (actor.givesCollision()) {
+                list.push(actor);
+            }
+        }
+
+        return list;
+    }
+
+    /**
+     * Updates the stage and all of its actors and props.
+     *
+     * @param {SquareUpdateContext} u
+     */
+    update(u) {
+        for (let id in this.actors) {
+            let actor = this.actors[id];
+            actor.update(u);
         }
     }
 
     /**
      * Draws the stage and all of its actors and props.
      *
-     * @param {SquareDrawContext} drawContext
+     * @param {SquareDrawContext} d
      */
-    draw(drawContext) {
+    draw(d) {
         // Draw each actor on the stage, but by their self-defined Z order
         // The lowest Z layer number is drawn first, the higher the Z value the later it is drawn
         let zLayerThis = 0;
@@ -86,7 +106,11 @@ class SquareStage extends SquareObject {
 
                 if (actor.zLayer <= zLayerThis) {
                     // Item Z is on our layer, draw it
-                    actor.draw(drawContext);
+                    actor.draw(d);
+
+                    if (actor.hasCollider() && SquareDiagnostics.debugEnabled) {
+                        actor.collider.draw(d);
+                    }
                 } else {
                     // Item Z is above our layer, retain it for a subsequent draw
                     zLayerNextItems.push(actor);

@@ -3,6 +3,9 @@ class GuyActor extends SquareActor {
         super();
 
         this.didInit = false;
+
+        this.collider = new SquareCollider(0, 0, 32, 32, true, true);
+        this.collider.attachTo(this);
     }
 
     update(u) {
@@ -20,6 +23,8 @@ class GuyActor extends SquareActor {
 
         this.velocity.y += SquareMath.rand(-10, +10) / 1000;
         this.velocity.x -= SquareMath.rand(-10, +10) / 1000;
+
+        this.collider.update(u);
     }
 
     draw(d) {

@@ -1,6 +1,6 @@
 class SquareKeyboard extends SquareObject {
     constructor() {
-        super.constructor();
+        super();
 
         this.keysDownNow = [];
 
