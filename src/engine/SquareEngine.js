@@ -106,13 +106,13 @@ class SquareEngine {
         // Update camera
         this.camera.update(u);
 
+        // Update the stage, which is where the game lives
+        this.stage.update(u);
+
         // Update UI components
         for (let i = 0; i < this.uiComponents.length; i++) {
             this.uiComponents[i].update(u);
         }
-
-        // Update the stage, which is where the game lives
-        this.stage.update(u);
     }
 
     /**
@@ -124,15 +124,15 @@ class SquareEngine {
         // Clear the frame
         d.context.clearRect(0, 0, d.resolution.w, d.resolution.h);
 
-        // Draw UI components
-        for (let i = 0; i < this.uiComponents.length; i++) {
-            this.uiComponents[i].draw(d);
-        }
-
         // Apply camera translation, draw the game stage, and undo the translation
         this.camera.translateContext(d.context);
         this.stage.draw(d);
         this.camera.untranslateContext(d.context);
+
+        // Draw UI components
+        for (let i = 0; i < this.uiComponents.length; i++) {
+            this.uiComponents[i].draw(d);
+        }
     }
 
     /**
