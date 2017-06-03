@@ -48,6 +48,9 @@ class SquareEngine {
 
         SquareEngine.updateResolution();
 
+        // Initialize game camera
+        this.camera = new SquareCamera();
+
         // Prepare game loop context data
         this.drawContext = new SquareDrawContext();
         this.updateContext = new SquareUpdateContext();
@@ -74,29 +77,34 @@ class SquareEngine {
     /**
      * Game loop main update method.
      *
-     * @param {SquareUpdateContext} updateContext
+     * @param {SquareUpdateContext} u
      */
-    static update(updateContext) {
+    static update(u) {
+        // Update camera
+        this.camera.update(u);
+
         // Update the stage, which is where the game lives
-        this.stage.update(updateContext);
+        this.stage.update(u);
     }
 
     /**
      * Game loop main draw method.
      *
-     * @param {SquareDrawContext} drawContext
+     * @param {SquareDrawContext} d
      */
-    static draw(drawContext) {
+    static draw(d) {
         // Clear the frame
-        drawContext.context.clearRect(0, 0, drawContext.resolution.w, drawContext.resolution.h);
+        d.context.clearRect(0, 0, d.resolution.w, d.resolution.h);
 
         // Draw res / fps diag stuff
-        drawContext.context.fillStyle = "#f0f";
-        drawContext.context.fillText(this.resolution.w + "x" + this.resolution.h + " / " + SquareDiagnostics.fpsResult
+        d.context.fillStyle = "#f0f";
+        d.context.fillText(this.resolution.w + "x" + this.resolution.h + " / " + SquareDiagnostics.fpsResult
             + " / " + SquareDiagnostics.frameCounter, 15, 15);
 
-        // Draw the stage, which is where the game lives
-        this.stage.draw(drawContext);
+        // Apply camera translation, draw the game stage, and undo the translation
+        this.camera.translateContext(d.context);
+        this.stage.draw(d);
+        this.camera.untranslateContext(d.context);
     }
 
     /**
