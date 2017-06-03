@@ -85,16 +85,16 @@ class SquareEngine {
      * Performs the main game loop.
      */
     static loop() {
-        requestAnimationFrame(SquareEngine.loop.bind(this));
+        requestAnimationFrame(SquareEngine.loop);
 
         let now = Date.now();
-        let delta = now - this._frameStartTime;
+        let delta = now - SquareEngine._frameStartTime;
 
-        if (delta >= this._frameInterval) {
+        if (delta >= SquareEngine._frameInterval) {
             SquareEngine.updateContext.delta = (delta - SquareEngine.updateContext.delta);
             SquareEngine.updateContext.deltaTotal = delta;
 
-            this._frameStartTime = now - (delta % this._frameInterval);
+            SquareEngine._frameStartTime = now - (delta % SquareEngine._frameInterval);
 
             SquareEngine.update(SquareEngine.updateContext);
             SquareEngine.draw(SquareEngine.drawContext);
