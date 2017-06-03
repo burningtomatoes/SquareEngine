@@ -76,6 +76,10 @@ class SquareEngine {
         this._frameStartTime = 0;
     }
 
+    static get frameRateTarget() {
+        return this._frameRateTarget;
+    }
+
     /**
      * Performs the main game loop.
      */
@@ -86,7 +90,8 @@ class SquareEngine {
         let delta = now - this._frameStartTime;
 
         if (delta >= this._frameInterval) {
-            SquareEngine.updateContext.delta = delta;
+            SquareEngine.updateContext.delta = (delta - SquareEngine.updateContext.delta);
+            SquareEngine.updateContext.deltaTotal = delta;
 
             this._frameStartTime = now - (delta % this._frameInterval);
 
@@ -94,6 +99,13 @@ class SquareEngine {
             SquareEngine.draw(SquareEngine.drawContext);
 
             SquareDiagnostics.frameEnd();
+
+            SquareEngine.updateContext.delta = 0;
+        } else {
+            SquareDiagnostics.frameSkipped();
+
+            SquareEngine.updateContext.delta = delta;
+            SquareEngine.updateContext.deltaTotal = delta;
         }
     }
 

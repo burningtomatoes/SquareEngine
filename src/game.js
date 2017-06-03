@@ -1,7 +1,7 @@
 $(document).ready(function () {
     SquareDiagnostics.enableDebug();
 
-    SquareEngine.setFrameRateTarget(50);
+    SquareEngine.setFrameRateTarget(30);
     SquareEngine.start('game');
 
     if (SquareDiagnostics.debugEnabled) {

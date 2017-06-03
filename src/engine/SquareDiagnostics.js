@@ -21,19 +21,45 @@ class SquareDiagnostics {
             return;
         }
 
-        let now = new Date().getTime();
+        let now = Date.now();
 
         if (!this.fpsTime) {
             this.frameCounter = 0;
             this.fpsResult = 0;
+            this.fpsSkippedResult = 0;
+            this.fpsDroppedResult = 0;
             this.fpsTime = now;
         }
 
         this.frameCounter++;
 
+        this._afterFrame();
+    }
+
+    static frameSkipped() {
+        if (!this.debugEnabled) {
+            return;
+        }
+
+        if (!this.framesSkipped) {
+            this.framesSkipped = 0;
+        }
+
+        this.framesSkipped++;
+        this._afterFrame();
+    }
+
+    static _afterFrame() {
+        let now = Date.now();
+
         if ((now - this.fpsTime) >= 1000) {
             this.fpsResult = this.frameCounter;
+            this.fpsSkippedResult = this.framesSkipped;
+            this.fpsDroppedResult = SquareMath.clamp(SquareEngine.frameRateTarget - this.fpsResult, 0, SquareEngine.frameRateTarget);
+
             this.frameCounter = 0;
+            this.framesSkipped = 0;
+
             this.fpsTime = now;
 
             this.logDebug('FPS result:', this.fpsResult);
