@@ -51,13 +51,13 @@ class GuyActor extends SquareActor {
             if (SquareEngine.keyboard.keyIsPressed(SquareKeyCode.UP)) {
                 this.velocity.y--;
             }
-
-            this.velocity.x = SquareMath.lerp(this.velocity.x, 0, 0.1);
-            this.velocity.y = SquareMath.lerp(this.velocity.y, 0, 0.1);
         } else {
-            this.velocity.y += SquareMath.rand(-10, +10) / 1000;
-            this.velocity.x -= SquareMath.rand(-10, +10) / 1000;
+            this.velocity.y += SquareMath.rand(-10, +10) / 10;
+            this.velocity.x -= SquareMath.rand(-10, +10) / 10;
         }
+
+        this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
+        this.velocity.y = SquareMath.lerp(this.velocity.y, 0, .05);
 
         this.collider.update(u);
 

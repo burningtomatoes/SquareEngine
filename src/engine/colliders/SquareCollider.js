@@ -94,8 +94,32 @@ class SquareCollider extends SquareObject {
                     this.colliding = true;
                     this.collidingWith.push(counterActor);
 
-                    counterActor.velocity.x = (-counterActor.velocity.x);
-                    counterActor.velocity.y = (-counterActor.velocity.y);
+                    let fastestActorX;
+                    let fastestActorY;
+                    let slowestActorX;
+                    let slowestActorY;
+
+                    if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
+                        fastestActorX = counterActor;
+                        slowestActorX = this._actorTarget;
+                    } else {
+                        fastestActorX = this._actorTarget;
+                        slowestActorX = counterActor;
+                    }
+
+                    if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
+                        fastestActorY = counterActor;
+                        slowestActorY = this._actorTarget;
+                    } else {
+                        fastestActorY = this._actorTarget;
+                        slowestActorY = counterActor;
+                    }
+
+                    slowestActorX.velocity.x = fastestActorX.velocity.x;
+                    fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
+
+                    slowestActorY.velocity.y = fastestActorX.velocity.y;
+                    fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                 }
             }
         }
