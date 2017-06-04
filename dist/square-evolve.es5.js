@@ -1407,60 +1407,7 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
                 this.velocity.y--;
             }
         } else {
-            if (!this.collider.colliding) {
-                // AI: FIND ANY TARGET, WE'RE A DUMB CUBE SO WE DON'T CARE WHAT IT IS
-                if (!this._aiTarget) {
-                    this._aiTarget = SquareEngine.stage.getRandomActor();
-                }
-
-                // AI: CHECK IF TARGET IS (STILL) SUITABLE
-                if ( !this._aiTarget instanceof GuyActor || !this._aiTarget.id || this._aiTarget.isDead ||
-                    this._aiTarget.id === this.id) {
-                    this._aiTarget = null;
-                }
-
-                if (this._aiTarget) {
-                    // MOVEMENT: HOW FAST CAN WE MOVE PLEASE?
-                    var maxSpeedY = 5;
-                    var maxSpeedX = 5;
-
-                    var maxSpeedChangeY = 1;
-                    var maxSpeedChangeX = 1;
-
-                    // AI: MOVE TO OUR TARGET
-                    if (this._aiTarget.position.x > this.position.x) {
-                        this.velocity.x += maxSpeedChangeX;
-                    }
-
-                    if (this._aiTarget.position.x < this.position.x) {
-                        this.velocity.x -= maxSpeedChangeX;
-                    }
-
-                    if (this._aiTarget.position.y > this.position.y) {
-                        this.velocity.y += maxSpeedChangeY;
-                    }
-
-                    if (this._aiTarget.position.y < this.position.y) {
-                        this.velocity.y -= maxSpeedChangeY;
-                    }
-
-                    if (this.velocity.x <= -maxSpeedX) {
-                        this.velocity.x = -maxSpeedX;
-                    }
-
-                    if (this.velocity.x >= maxSpeedX) {
-                        this.velocity.x = maxSpeedX;
-                    }
-
-                    if (this.velocity.y <= -maxSpeedY) {
-                        this.velocity.y = -maxSpeedY;
-                    }
-
-                    if (this.velocity.y >= maxSpeedY) {
-                        this.velocity.y = maxSpeedY;
-                    }
-                }
-            }
+            this._chaosAi()
         }
 
         this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
@@ -1492,7 +1439,12 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
                 }
 
                 counterParty.size -= impactSize;
-                this.size += impactSize;
+
+                var sizeIncrease = (impactSize / 2);
+                this.size += sizeIncrease;
+
+                this._aiHunger -= 1000;
+                counterParty._aiHunger += 1000;
 
                 if (counterParty.collider) {
                     counterParty.collider.size.x -= impactSize;
@@ -1500,9 +1452,82 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
                 }
 
                 if (this.collider) {
-                    this.collider.size.x += impactSize;
-                    this.collider.size.y += impactSize;
+                    this.collider.size.x += sizeIncrease;
+                    this.collider.size.y += sizeIncrease;
                 }
+            }
+        }
+    };
+
+    proto$0._chaosAi = function() {
+        var maxSpeedY = 5;
+        var maxSpeedX = 5;
+
+        var maxSpeedChangeY = 1;
+        var maxSpeedChangeX = 1;
+
+        if (!this.collider.colliding) {
+            if (!this._aiHunger) {
+                this._aiHunger = SquareMath.rand(-5000, 5000);
+            }
+
+            // AI: FIND ANY TARGET, WE'RE A DUMB CUBE SO WE DON'T CARE WHAT IT IS
+            if (!this._aiTarget && this._aiHunger >= 1000) {
+                this._aiTarget = SquareEngine.stage.getRandomActor();
+                this._aiInterest = SquareMath.rand(100, 5000);
+            }
+
+            this._aiInterest--;
+            this._aiHunger++;
+
+            if (this.size < 10) {
+                this._aiHunger += 100;
+            }
+
+            // AI: CHECK IF TARGET IS (STILL) SUITABLE AND WE'RE STILL INTERESTED
+            if (!this._aiTarget || !this._aiTarget instanceof GuyActor || !this._aiTarget.id || this._aiTarget.isDead ||
+                this._aiTarget.id === this.id || this._aiInterest <= 0 || this._aiHunger < 0) {
+                this._aiTarget = null;
+            }
+
+            if (this._aiTarget) {
+                // AI: MOVE TO OUR TARGET
+                if (this._aiTarget.position.x > this.position.x) {
+                    this.velocity.x += maxSpeedChangeX;
+                }
+
+                if (this._aiTarget.position.x < this.position.x) {
+                    this.velocity.x -= maxSpeedChangeX;
+                }
+
+                if (this._aiTarget.position.y > this.position.y) {
+                    this.velocity.y += maxSpeedChangeY;
+                }
+
+                if (this._aiTarget.position.y < this.position.y) {
+                    this.velocity.y -= maxSpeedChangeY;
+                }
+            } else {
+                // WANDER LIKE BEFORE
+                this.velocity.y += SquareMath.rand(-10, +10) / 10;
+                this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            }
+
+            // SPEED CLAMP
+            if (this.velocity.x <= -maxSpeedX) {
+                this.velocity.x = -maxSpeedX;
+            }
+
+            if (this.velocity.x >= maxSpeedX) {
+                this.velocity.x = maxSpeedX;
+            }
+
+            if (this.velocity.y <= -maxSpeedY) {
+                this.velocity.y = -maxSpeedY;
+            }
+
+            if (this.velocity.y >= maxSpeedY) {
+                this.velocity.y = maxSpeedY;
             }
         }
     };
