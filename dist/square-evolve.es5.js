@@ -529,6 +529,7 @@ var SquareActor = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareActor,
      * After the emitter is done, it will be destroyed automatically.
      *
      * @param {number} runtime The amount of frames this emitter should run for.
+     * @return {SquareParticleEmitter}
      */
     proto$0.emitParticles = function(runtime) {
         var emitter = new SquareParticleEmitter();
@@ -537,6 +538,7 @@ var SquareActor = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareActor,
         emitter.emitterRuntime = runtime;
         SquareEngine.stage.addActor(emitter);
         emitter.start();
+        return emitter;
     };
 
     /**
@@ -1222,8 +1224,7 @@ MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;}
             particlesToGenerate = this.emitterParticleAmountMin;
         }
 
-        for (var iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
-        this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
+        for (var iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
             var newParticle = new this.emitterParticleType;
             newParticle.color = this.emitterParticleColor;
             newParticle.position = this.position.clone();
@@ -1340,7 +1341,13 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
         }
 
         if (this.collider.didCollide) {
-            this.emitParticles(10);
+            var emitter = this.emitParticles(10);
+            emitter.emitterParticleAmountMin = 10;
+            emitter.emitterParticleAmount = 5;
+            emitter.emitterParticleAmountMax = 15;
+            emitter.emitterRuntime = 3;
+            emitter.position.x += 12;
+            emitter.position.y += 12;
         }
     };
 

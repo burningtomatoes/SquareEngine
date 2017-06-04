@@ -529,6 +529,7 @@ class SquareActor extends SquareObject {
      * After the emitter is done, it will be destroyed automatically.
      *
      * @param {number} runtime The amount of frames this emitter should run for.
+     * @return {SquareParticleEmitter}
      */
     emitParticles(runtime) {
         let emitter = new SquareParticleEmitter();
@@ -537,6 +538,7 @@ class SquareActor extends SquareObject {
         emitter.emitterRuntime = runtime;
         SquareEngine.stage.addActor(emitter);
         emitter.start();
+        return emitter;
     }
 
     /**
@@ -1222,8 +1224,7 @@ class SquareCollider extends SquareObject {
             particlesToGenerate = this.emitterParticleAmountMin;
         }
 
-        for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
-        this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
+        for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
             let newParticle = new this.emitterParticleType;
             newParticle.color = this.emitterParticleColor;
             newParticle.position = this.position.clone();
@@ -1340,7 +1341,13 @@ class SquareCollider extends SquareObject {
         }
 
         if (this.collider.didCollide) {
-            this.emitParticles(10);
+            let emitter = this.emitParticles(10);
+            emitter.emitterParticleAmountMin = 10;
+            emitter.emitterParticleAmount = 5;
+            emitter.emitterParticleAmountMax = 15;
+            emitter.emitterRuntime = 3;
+            emitter.position.x += 12;
+            emitter.position.y += 12;
         }
     }
 
