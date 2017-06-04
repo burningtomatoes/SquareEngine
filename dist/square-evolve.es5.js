@@ -1343,9 +1343,7 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
         if (this.collider.didCollide) {
             var emitter = this.emitParticles(10);
             emitter.emitterParticleAmountMin = 10;
-            emitter.emitterParticleAmount = 5;
-            emitter.emitterParticleAmountMax = 15;
-            emitter.emitterRuntime = 3;
+            emitter.emitterRuntime = 1;
             emitter.position.x += 12;
             emitter.position.y += 12;
         }

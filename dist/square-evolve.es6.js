@@ -1343,9 +1343,7 @@ class SquareCollider extends SquareObject {
         if (this.collider.didCollide) {
             let emitter = this.emitParticles(10);
             emitter.emitterParticleAmountMin = 10;
-            emitter.emitterParticleAmount = 5;
-            emitter.emitterParticleAmountMax = 15;
-            emitter.emitterRuntime = 3;
+            emitter.emitterRuntime = 1;
             emitter.position.x += 12;
             emitter.position.y += 12;
         }
