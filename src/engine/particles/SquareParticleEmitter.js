@@ -73,8 +73,7 @@ class SquareParticleEmitter extends SquareActor {
             particlesToGenerate = this.emitterParticleAmountMin;
         }
 
-        for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
-        this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
+        for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
             let newParticle = new this.emitterParticleType;
             newParticle.color = this.emitterParticleColor;
             newParticle.position = this.position.clone();
