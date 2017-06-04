@@ -5,12 +5,13 @@ class SquareParticleEmitter extends SquareActor {
         this.particles = [];
 
         this.emitterStarted = false;
-        this.emitterRuntime = 10;
+        this.emitterRuntime = Infinity;
         this.emitterRemoveOnStop = true;
         this.emitterParticleType = SquareParticle;
         this.emitterParticleAmount = 1;
         this.emitterParticleAmountMin = 0;
-        this.emitterParticleAmountMax = 10;
+        this.emitterParticleAmountMax = 20;
+        this.emitterParticleColor = '#ffffff';
     }
 
     start() {
@@ -22,27 +23,48 @@ class SquareParticleEmitter extends SquareActor {
             SquareDiagnostics.logDebug('Debug warning: Starting particle emitter that has no runtime remaining');
         }
 
+        this.particles = [];
         this.emitterStarted = true;
     }
 
     stop() {
-        this.emitterStarted = false;
+        if (this.emitterStarted) {
+            this.emitterStarted = false;
+        }
 
-        if (this.emitterRemoveOnStop) {
+        if (this.emitterRemoveOnStop && this.particles.length === 0) {
             this.remove();
         }
     }
 
     update(u) {
-        if (!this.emitterStarted) {
-            return;
+        // Update all existing particles
+        for (let i = 0; i < this.particles.length; i++) {
+            this.particles[i].update(u);
         }
 
-        if (this.emitterRuntime <= 0) {
+        // Clean up dead particles
+        let remainingParticles = [];
+
+        for (let i = 0; i < this.particles.length; i++) {
+            let particle = this.particles[i];
+
+            if (particle.isComplete) {
+                continue;
+            }
+
+            remainingParticles.push(particle);
+        }
+
+        this.particles = remainingParticles;
+
+        // If the emitter is not running or has "expired", call stop to clean ourselves up if needed
+        if (!this.emitterStarted || this.emitterRuntime <= 0) {
             this.stop();
             return;
         }
 
+        // Spawn new particles within the bounds of our config
         let particlesToGenerate = this.emitterParticleAmount;
 
         if (this.particles.length + particlesToGenerate < this.emitterParticleAmountMin) {
@@ -52,23 +74,19 @@ class SquareParticleEmitter extends SquareActor {
         for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
         this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
             let newParticle = new this.emitterParticleType;
-            newParticle.position = new SquareCoordinate(this.position.x, this.position.y);
+            newParticle.color = this.emitterParticleColor;
+            newParticle.position = this.position.clone();
 
             this.particles.push(newParticle);
+
+            newParticle.update(u);
         }
 
-        for (let i = 0; i < this.particles.length; i++) {
-            this.particles[i].update(u);
-        }
-
+        // Decrement remaining time
         this.emitterRuntime--;
     }
 
     draw(d) {
-        if (!this.emitterStarted) {
-            return;
-        }
-
         for (let i = 0; i < this.particles.length; i++) {
             this.particles[i].draw(d);
         }
