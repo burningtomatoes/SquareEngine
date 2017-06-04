@@ -809,7 +809,12 @@ class SquareCollider extends SquareObject {
         this.rect.h = this.size.y;
 
         // If we receive collision, check for collision state
+        if (!this.collidingWith) {
+            this.collidingWith = [];
+        }
+
         let wasColliding = this.colliding;
+        let wasCollidingWith = this.collidingWith.slice();
 
         this.colliding = false;
         this.didCollide = false;
@@ -829,39 +834,40 @@ class SquareCollider extends SquareObject {
 
                 if (counterCollider.collidesWith(this)) {
                     this.colliding = true;
+                    this.collidingWith.push(counterActor);
 
                     if (!wasColliding) {
                         this.didCollide = true;
                     }
 
-                    this.collidingWith.push(counterActor);
+                    if (wasCollidingWith.indexOf(counterActor) === -1) {
+                        let fastestActorX;
+                        let fastestActorY;
+                        let slowestActorX;
+                        let slowestActorY;
 
-                    let fastestActorX;
-                    let fastestActorY;
-                    let slowestActorX;
-                    let slowestActorY;
+                        if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
+                            fastestActorX = counterActor;
+                            slowestActorX = this._actorTarget;
+                        } else {
+                            fastestActorX = this._actorTarget;
+                            slowestActorX = counterActor;
+                        }
 
-                    if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
-                        fastestActorX = counterActor;
-                        slowestActorX = this._actorTarget;
-                    } else {
-                        fastestActorX = this._actorTarget;
-                        slowestActorX = counterActor;
+                        if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
+                            fastestActorY = counterActor;
+                            slowestActorY = this._actorTarget;
+                        } else {
+                            fastestActorY = this._actorTarget;
+                            slowestActorY = counterActor;
+                        }
+
+                        slowestActorX.velocity.x = fastestActorX.velocity.x;
+                        fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
+
+                        slowestActorY.velocity.y = fastestActorX.velocity.y;
+                        fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                     }
-
-                    if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
-                        fastestActorY = counterActor;
-                        slowestActorY = this._actorTarget;
-                    } else {
-                        fastestActorY = this._actorTarget;
-                        slowestActorY = counterActor;
-                    }
-
-                    slowestActorX.velocity.x = fastestActorX.velocity.x;
-                    fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
-
-                    slowestActorY.velocity.y = fastestActorX.velocity.y;
-                    fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                 }
             }
         }
@@ -1120,29 +1126,56 @@ class SquareCollider extends SquareObject {
     constructor() {
         super();
 
-        this.velocity.x = SquareMath.rand(-5, +5);
-        this.velocity.y = SquareMath.rand(-5, +5);
         this.size = 6;
         this.color = '#fff';
+        this.velocityMin = -5;
+        this.velocityMax = +5;
+        this.velocityContinuous = false;
+
+        this.persist = false;
+        this.stopped = false;
+        this.didStart = false;
     }
 
     get isComplete() {
-        return this.size < 1;
+        return this.size < 1 || this.stopped;
     }
 
     update(u) {
+        if (!this.didStart) {
+            this.velocity.x = SquareMath.rand(this.velocityMin, this.velocityMax);
+            this.velocity.y = SquareMath.rand(this.velocityMin, this.velocityMax);
+            this.didStart = true;
+        }
+
+        if (this.velocityContinuous) {
+            this.velocity.x = SquareMath.lerp(this.velocity.x, SquareMath.rand(this.velocityMin, this.velocityMax), .5);
+            this.velocity.y = SquareMath.lerp(this.velocity.y, SquareMath.rand(this.velocityMin, this.velocityMax), .5);
+        }
+
         if (this.isComplete) {
             return;
         }
 
         super.update(u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.1);
+        if (!this.persist) {
+            // If not persistent, decrease in size until dead
+            this.size = SquareMath.lerp(this.size, 0, 0.1);
+        } else {
+            // Otherwise, we'll slow down until stopped
+            this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
+            this.velocity.y = SquareMath.lerp(this.velocity.y, 0, .05);
+
+            if (Math.abs(this.velocity.x) < .5 && Math.abs(this.velocity.y) < .5) {
+                this.stopped = true;
+            }
+        }
     }
 
     draw(d) {
-        if (this.isComplete) {
-            // Done, nothing to draw
+        if (this.size <= 0) {
+            // Do not attempt to draw invisible particles
             return;
         }
 
@@ -1165,6 +1198,10 @@ class SquareCollider extends SquareObject {
         this.emitterParticleColor = '#ffffff';
         this.emitterParticleSizeMin = 4;
         this.emitterParticleSizeMax = 6;
+        this.emitterParticleVelocityMin = -5;
+        this.emitterParticleVelocityMax = +5;
+        this.emitterParticleVelocityContinuous = false;
+        this.emitterPersistent = false;
     }
 
     start() {
@@ -1202,7 +1239,7 @@ class SquareCollider extends SquareObject {
         for (let i = 0; i < this.particles.length; i++) {
             let particle = this.particles[i];
 
-            if (particle.isComplete) {
+            if (particle.isComplete && !particle.persist) {
                 continue;
             }
 
@@ -1229,6 +1266,10 @@ class SquareCollider extends SquareObject {
             newParticle.color = this.emitterParticleColor;
             newParticle.position = this.position.clone();
             newParticle.size = SquareMath.rand(this.emitterParticleSizeMin, this.emitterParticleSizeMax);
+            newParticle.persist = this.emitterPersistent;
+            newParticle.velocityMin = this.emitterParticleVelocityMin;
+            newParticle.velocityMax = this.emitterParticleVelocityMax;
+            newParticle.velocityContinuous = this.emitterParticleVelocityContinuous;
 
             this.particles.push(newParticle);
 
@@ -1261,6 +1302,7 @@ class SquareCollider extends SquareObject {
     let ourPlayer = SquareEngine.stage.getActorById(321);
     SquareEngine.camera.attachTo(ourPlayer);
     ourPlayer.isPlayer = true;
+    ourPlayer.color = '#ffe547';
 
     ourPlayer.update(SquareEngine.updateContext);
 
@@ -1268,6 +1310,11 @@ class SquareCollider extends SquareObject {
     particleTest.emitterRuntime = Infinity;
     particleTest.emitterParticleAmountMin = 0;
     particleTest.emitterParticleAmountMax = Infinity;
+    particleTest.emitterParticleSizeMin = 2;
+    particleTest.emitterParticleSizeMax = 6;
+    particleTest.emitterParticleVelocityMax = +15;
+    particleTest.emitterParticleVelocityMin = -15;
+    particleTest.emitterParticleVelocityContinuous = true;
     particleTest.emitterParticleColor = '#ff0000';
     particleTest.position = ourPlayer.position.clone();
     particleTest.start();
@@ -1283,12 +1330,30 @@ class SquareCollider extends SquareObject {
         this.collider.attachTo(this);
 
         this.isPlayer = false;
+        this.color = '#ffffff';
 
         this.size = 32;
     }
 
+    get isDead() {
+        return this.size < 1;
+    }
+
     update(u) {
         super.update(u);
+
+        if (this.isDead) {
+            let deathExplode = this.emitParticles(1);
+            deathExplode.emitterParticleSizeMin = 1;
+            deathExplode.emitterParticleSizeMax = 3;
+            deathExplode.emitterParticleAmountMin = 10;
+            deathExplode.emitterPersistent = true;
+            deathExplode.emitterParticleColor = this.color;
+            deathExplode.start();
+
+            this.remove();
+            return;
+        }
 
         let isNew = false;
 
@@ -1329,8 +1394,10 @@ class SquareCollider extends SquareObject {
                 this.velocity.y--;
             }
         } else {
-            this.velocity.y += SquareMath.rand(-10, +10) / 10;
-            this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            if (!this.collider.colliding) {
+                this.velocity.y += SquareMath.rand(-10, +10) / 10;
+                this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            }
         }
 
         this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
@@ -1351,17 +1418,27 @@ class SquareCollider extends SquareObject {
 
             for (let i = 0; i < this.collider.collidingWith.length; i++) {
                 let counterParty = this.collider.collidingWith[i];
-                counterParty.size -= 1;
-                this.size += 1;
+                let impactSize = 1 + ((this.size - counterParty.size) / 10);
+
+                if (impactSize < 1) {
+                    impactSize = 1;
+                }
+
+                if (impactSize > counterParty.size) {
+                    impactSize = counterParty.size;
+                }
+
+                counterParty.size -= impactSize;
+                this.size += impactSize;
 
                 if (counterParty.collider) {
-                    counterParty.collider.size.x--;
-                    counterParty.collider.size.y--;
+                    counterParty.collider.size.x -= impactSize;
+                    counterParty.collider.size.y -= impactSize;
                 }
 
                 if (this.collider) {
-                    this.collider.size.x++;
-                    this.collider.size.y++;
+                    this.collider.size.x += impactSize;
+                    this.collider.size.y += impactSize;
                 }
             }
         }
@@ -1374,7 +1451,7 @@ class SquareCollider extends SquareObject {
 
         super.draw(d);
 
-        d.context.fillStyle = this.isPlayer ? '#ff0000' : '#fff';
+        d.context.fillStyle = this.color;
         d.context.fillRect(this.drawPosition.x, this.drawPosition.y, this.size, this.size);
     }
 }

@@ -15,6 +15,7 @@ $(document).ready(function () {
     let ourPlayer = SquareEngine.stage.getActorById(321);
     SquareEngine.camera.attachTo(ourPlayer);
     ourPlayer.isPlayer = true;
+    ourPlayer.color = '#ffe547';
 
     ourPlayer.update(SquareEngine.updateContext);
 
@@ -22,6 +23,11 @@ $(document).ready(function () {
     particleTest.emitterRuntime = Infinity;
     particleTest.emitterParticleAmountMin = 0;
     particleTest.emitterParticleAmountMax = Infinity;
+    particleTest.emitterParticleSizeMin = 2;
+    particleTest.emitterParticleSizeMax = 6;
+    particleTest.emitterParticleVelocityMax = +15;
+    particleTest.emitterParticleVelocityMin = -15;
+    particleTest.emitterParticleVelocityContinuous = true;
     particleTest.emitterParticleColor = '#ff0000';
     particleTest.position = ourPlayer.position.clone();
     particleTest.start();

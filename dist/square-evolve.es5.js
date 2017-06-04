@@ -809,7 +809,12 @@ var SquareCollider = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareCol
         this.rect.h = this.size.y;
 
         // If we receive collision, check for collision state
+        if (!this.collidingWith) {
+            this.collidingWith = [];
+        }
+
         var wasColliding = this.colliding;
+        var wasCollidingWith = this.collidingWith.slice();
 
         this.colliding = false;
         this.didCollide = false;
@@ -829,39 +834,40 @@ var SquareCollider = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareCol
 
                 if (counterCollider.collidesWith(this)) {
                     this.colliding = true;
+                    this.collidingWith.push(counterActor);
 
                     if (!wasColliding) {
                         this.didCollide = true;
                     }
 
-                    this.collidingWith.push(counterActor);
+                    if (wasCollidingWith.indexOf(counterActor) === -1) {
+                        var fastestActorX = void 0;
+                        var fastestActorY = void 0;
+                        var slowestActorX = void 0;
+                        var slowestActorY = void 0;
 
-                    var fastestActorX = void 0;
-                    var fastestActorY = void 0;
-                    var slowestActorX = void 0;
-                    var slowestActorY = void 0;
+                        if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
+                            fastestActorX = counterActor;
+                            slowestActorX = this._actorTarget;
+                        } else {
+                            fastestActorX = this._actorTarget;
+                            slowestActorX = counterActor;
+                        }
 
-                    if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
-                        fastestActorX = counterActor;
-                        slowestActorX = this._actorTarget;
-                    } else {
-                        fastestActorX = this._actorTarget;
-                        slowestActorX = counterActor;
+                        if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
+                            fastestActorY = counterActor;
+                            slowestActorY = this._actorTarget;
+                        } else {
+                            fastestActorY = this._actorTarget;
+                            slowestActorY = counterActor;
+                        }
+
+                        slowestActorX.velocity.x = fastestActorX.velocity.x;
+                        fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
+
+                        slowestActorY.velocity.y = fastestActorX.velocity.y;
+                        fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                     }
-
-                    if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
-                        fastestActorY = counterActor;
-                        slowestActorY = this._actorTarget;
-                    } else {
-                        fastestActorY = this._actorTarget;
-                        slowestActorY = counterActor;
-                    }
-
-                    slowestActorX.velocity.x = fastestActorX.velocity.x;
-                    fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
-
-                    slowestActorY.velocity.y = fastestActorX.velocity.y;
-                    fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                 }
             }
         }
@@ -1120,29 +1126,56 @@ MIXIN$0(SquareKeyboard.prototype,proto$0);proto$0=void 0;return SquareKeyboard;}
     function SquareParticle() {
         super$0.call(this);
 
-        this.velocity.x = SquareMath.rand(-5, +5);
-        this.velocity.y = SquareMath.rand(-5, +5);
         this.size = 6;
         this.color = '#fff';
+        this.velocityMin = -5;
+        this.velocityMax = +5;
+        this.velocityContinuous = false;
+
+        this.persist = false;
+        this.stopped = false;
+        this.didStart = false;
     }if(super$0!==null)SP$0(SquareParticle,super$0);SquareParticle.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":SquareParticle,"configurable":true,"writable":true}, isComplete: {"get": $isComplete_get$0, "configurable":true,"enumerable":true}});DP$0(SquareParticle,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
     function $isComplete_get$0() {
-        return this.size < 1;
+        return this.size < 1 || this.stopped;
     }
 
     proto$0.update = function(u) {
+        if (!this.didStart) {
+            this.velocity.x = SquareMath.rand(this.velocityMin, this.velocityMax);
+            this.velocity.y = SquareMath.rand(this.velocityMin, this.velocityMax);
+            this.didStart = true;
+        }
+
+        if (this.velocityContinuous) {
+            this.velocity.x = SquareMath.lerp(this.velocity.x, SquareMath.rand(this.velocityMin, this.velocityMax), .5);
+            this.velocity.y = SquareMath.lerp(this.velocity.y, SquareMath.rand(this.velocityMin, this.velocityMax), .5);
+        }
+
         if (this.isComplete) {
             return;
         }
 
         super$0.prototype.update.call(this, u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.1);
+        if (!this.persist) {
+            // If not persistent, decrease in size until dead
+            this.size = SquareMath.lerp(this.size, 0, 0.1);
+        } else {
+            // Otherwise, we'll slow down until stopped
+            this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
+            this.velocity.y = SquareMath.lerp(this.velocity.y, 0, .05);
+
+            if (Math.abs(this.velocity.x) < .5 && Math.abs(this.velocity.y) < .5) {
+                this.stopped = true;
+            }
+        }
     };
 
     proto$0.draw = function(d) {
-        if (this.isComplete) {
-            // Done, nothing to draw
+        if (this.size <= 0) {
+            // Do not attempt to draw invisible particles
             return;
         }
 
@@ -1165,6 +1198,10 @@ MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;}
         this.emitterParticleColor = '#ffffff';
         this.emitterParticleSizeMin = 4;
         this.emitterParticleSizeMax = 6;
+        this.emitterParticleVelocityMin = -5;
+        this.emitterParticleVelocityMax = +5;
+        this.emitterParticleVelocityContinuous = false;
+        this.emitterPersistent = false;
     }if(super$0!==null)SP$0(SquareParticleEmitter,super$0);SquareParticleEmitter.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":SquareParticleEmitter,"configurable":true,"writable":true}});DP$0(SquareParticleEmitter,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
     proto$0.start = function() {
@@ -1202,7 +1239,7 @@ MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;}
         for (var i$0 = 0; i$0 < this.particles.length; i$0++) {
             var particle = this.particles[i$0];
 
-            if (particle.isComplete) {
+            if (particle.isComplete && !particle.persist) {
                 continue;
             }
 
@@ -1229,6 +1266,10 @@ MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;}
             newParticle.color = this.emitterParticleColor;
             newParticle.position = this.position.clone();
             newParticle.size = SquareMath.rand(this.emitterParticleSizeMin, this.emitterParticleSizeMax);
+            newParticle.persist = this.emitterPersistent;
+            newParticle.velocityMin = this.emitterParticleVelocityMin;
+            newParticle.velocityMax = this.emitterParticleVelocityMax;
+            newParticle.velocityContinuous = this.emitterParticleVelocityContinuous;
 
             this.particles.push(newParticle);
 
@@ -1261,6 +1302,7 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
     var ourPlayer = SquareEngine.stage.getActorById(321);
     SquareEngine.camera.attachTo(ourPlayer);
     ourPlayer.isPlayer = true;
+    ourPlayer.color = '#ffe547';
 
     ourPlayer.update(SquareEngine.updateContext);
 
@@ -1268,6 +1310,11 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
     particleTest.emitterRuntime = Infinity;
     particleTest.emitterParticleAmountMin = 0;
     particleTest.emitterParticleAmountMax = Infinity;
+    particleTest.emitterParticleSizeMin = 2;
+    particleTest.emitterParticleSizeMax = 6;
+    particleTest.emitterParticleVelocityMax = +15;
+    particleTest.emitterParticleVelocityMin = -15;
+    particleTest.emitterParticleVelocityContinuous = true;
     particleTest.emitterParticleColor = '#ff0000';
     particleTest.position = ourPlayer.position.clone();
     particleTest.start();
@@ -1283,12 +1330,30 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
         this.collider.attachTo(this);
 
         this.isPlayer = false;
+        this.color = '#ffffff';
 
         this.size = 32;
-    }if(super$0!==null)SP$0(GuyActor,super$0);GuyActor.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":GuyActor,"configurable":true,"writable":true}});DP$0(GuyActor,"prototype",{"configurable":false,"enumerable":false,"writable":false});
+    }if(super$0!==null)SP$0(GuyActor,super$0);GuyActor.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":GuyActor,"configurable":true,"writable":true}, isDead: {"get": $isDead_get$0, "configurable":true,"enumerable":true}});DP$0(GuyActor,"prototype",{"configurable":false,"enumerable":false,"writable":false});
+
+    function $isDead_get$0() {
+        return this.size < 1;
+    }
 
     proto$0.update = function(u) {
         super$0.prototype.update.call(this, u);
+
+        if (this.isDead) {
+            var deathExplode = this.emitParticles(1);
+            deathExplode.emitterParticleSizeMin = 1;
+            deathExplode.emitterParticleSizeMax = 3;
+            deathExplode.emitterParticleAmountMin = 10;
+            deathExplode.emitterPersistent = true;
+            deathExplode.emitterParticleColor = this.color;
+            deathExplode.start();
+
+            this.remove();
+            return;
+        }
 
         var isNew = false;
 
@@ -1329,8 +1394,10 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
                 this.velocity.y--;
             }
         } else {
-            this.velocity.y += SquareMath.rand(-10, +10) / 10;
-            this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            if (!this.collider.colliding) {
+                this.velocity.y += SquareMath.rand(-10, +10) / 10;
+                this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            }
         }
 
         this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
@@ -1351,17 +1418,27 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
 
             for (var i$1 = 0; i$1 < this.collider.collidingWith.length; i$1++) {
                 var counterParty = this.collider.collidingWith[i$1];
-                counterParty.size -= 1;
-                this.size += 1;
+                var impactSize = 1 + ((this.size - counterParty.size) / 10);
+
+                if (impactSize < 1) {
+                    impactSize = 1;
+                }
+
+                if (impactSize > counterParty.size) {
+                    impactSize = counterParty.size;
+                }
+
+                counterParty.size -= impactSize;
+                this.size += impactSize;
 
                 if (counterParty.collider) {
-                    counterParty.collider.size.x--;
-                    counterParty.collider.size.y--;
+                    counterParty.collider.size.x -= impactSize;
+                    counterParty.collider.size.y -= impactSize;
                 }
 
                 if (this.collider) {
-                    this.collider.size.x++;
-                    this.collider.size.y++;
+                    this.collider.size.x += impactSize;
+                    this.collider.size.y += impactSize;
                 }
             }
         }
@@ -1374,7 +1451,7 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
 
         super$0.prototype.draw.call(this, d);
 
-        d.context.fillStyle = this.isPlayer ? '#ff0000' : '#fff';
+        d.context.fillStyle = this.color;
         d.context.fillRect(this.drawPosition.x, this.drawPosition.y, this.size, this.size);
     };
 MIXIN$0(GuyActor.prototype,proto$0);proto$0=void 0;return GuyActor;})(SquareActor);

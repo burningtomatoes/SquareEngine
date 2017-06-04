@@ -8,6 +8,7 @@ class GuyActor extends SquareActor {
         this.collider.attachTo(this);
 
         this.isPlayer = false;
+        this.color = '#ffffff';
 
         this.size = 32;
     }
@@ -20,6 +21,14 @@ class GuyActor extends SquareActor {
         super.update(u);
 
         if (this.isDead) {
+            let deathExplode = this.emitParticles(1);
+            deathExplode.emitterParticleSizeMin = 1;
+            deathExplode.emitterParticleSizeMax = 3;
+            deathExplode.emitterParticleAmountMin = 10;
+            deathExplode.emitterPersistent = true;
+            deathExplode.emitterParticleColor = this.color;
+            deathExplode.start();
+
             this.remove();
             return;
         }
@@ -120,7 +129,7 @@ class GuyActor extends SquareActor {
 
         super.draw(d);
 
-        d.context.fillStyle = this.isPlayer ? '#ff0000' : '#fff';
+        d.context.fillStyle = this.color;
         d.context.fillRect(this.drawPosition.x, this.drawPosition.y, this.size, this.size);
     }
 }
