@@ -14,6 +14,10 @@ class SquareParticleEmitter extends SquareActor {
         this.emitterParticleColor = '#ffffff';
         this.emitterParticleSizeMin = 4;
         this.emitterParticleSizeMax = 6;
+        this.emitterParticleVelocityMin = -5;
+        this.emitterParticleVelocityMax = +5;
+        this.emitterParticleVelocityContinuous = false;
+        this.emitterPersistent = false;
     }
 
     start() {
@@ -51,7 +55,7 @@ class SquareParticleEmitter extends SquareActor {
         for (let i = 0; i < this.particles.length; i++) {
             let particle = this.particles[i];
 
-            if (particle.isComplete) {
+            if (particle.isComplete && !particle.persist) {
                 continue;
             }
 
@@ -78,6 +82,10 @@ class SquareParticleEmitter extends SquareActor {
             newParticle.color = this.emitterParticleColor;
             newParticle.position = this.position.clone();
             newParticle.size = SquareMath.rand(this.emitterParticleSizeMin, this.emitterParticleSizeMax);
+            newParticle.persist = this.emitterPersistent;
+            newParticle.velocityMin = this.emitterParticleVelocityMin;
+            newParticle.velocityMax = this.emitterParticleVelocityMax;
+            newParticle.velocityContinuous = this.emitterParticleVelocityContinuous;
 
             this.particles.push(newParticle);
 
