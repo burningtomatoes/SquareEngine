@@ -4,16 +4,29 @@ class SquareParticle extends SquareActor {
 
         this.velocity.x = SquareMath.rand(-5, +5);
         this.velocity.y = SquareMath.rand(-5, +5);
-        this.size = 14;
+        this.size = 6;
+    }
+
+    get isComplete() {
+        return this.size <= 0;
     }
 
     update(u) {
+        if (this.isComplete) {
+            return;
+        }
+
         super.update(u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.2);
+        this.size = SquareMath.lerp(this.size, 0, 0.1);
     }
 
     draw(d) {
+        if (this.isComplete) {
+            // Done, nothing to draw
+            return;
+        }
+
         d.context.fillStyle = '#fff';
         d.context.fillRect(this.position.x, this.position.y, this.size, this.size);
     }
