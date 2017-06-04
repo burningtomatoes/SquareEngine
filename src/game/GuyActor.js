@@ -156,6 +156,8 @@ class GuyActor extends SquareActor {
             if (!this._aiTarget || !this._aiTarget instanceof GuyActor || !this._aiTarget.id || this._aiTarget.isDead ||
                 this._aiTarget.id === this.id || this._aiInterest <= 0 || this._aiHunger < 0) {
                 this._aiTarget = null;
+            } else {
+                this.color = '#ffaaaa'; // the color of anger
             }
 
             if (this._aiTarget) {
@@ -179,6 +181,8 @@ class GuyActor extends SquareActor {
                 // WANDER LIKE BEFORE
                 this.velocity.y += SquareMath.rand(-10, +10) / 10;
                 this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+
+                this.color = '#fff'; // the color of boredom
             }
 
             // SPEED CLAMP
