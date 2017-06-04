@@ -1413,8 +1413,9 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
                     this._aiTarget = SquareEngine.stage.getRandomActor();
                 }
 
-                // AI: TARGET DEAD, OR NOT ON STAGE ANYMORE, OR OURSELVES, OR NO POS? WE DONE WITH IT, TRY AGAIN LATERS
-                if (!this._aiTarget || !this._aiTarget.id || this._aiTarget.isDead || this._aiTarget.id === this.id || !this._aiTarget.position) {
+                // AI: CHECK IF TARGET IS (STILL) SUITABLE
+                if ( !this._aiTarget instanceof GuyActor || !this._aiTarget.id || this._aiTarget.isDead ||
+                    this._aiTarget.id === this.id) {
                     this._aiTarget = null;
                 }
 
