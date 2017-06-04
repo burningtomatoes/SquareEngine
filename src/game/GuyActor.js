@@ -66,7 +66,13 @@ class GuyActor extends SquareActor {
         }
 
         if (this.collider.didCollide) {
-            this.emitParticles(10);
+            let emitter = this.emitParticles(10);
+            emitter.emitterParticleAmountMin = 10;
+            emitter.emitterParticleAmount = 5;
+            emitter.emitterParticleAmountMax = 15;
+            emitter.emitterRuntime = 3;
+            emitter.position.x += 12;
+            emitter.position.y += 12;
         }
     }
 

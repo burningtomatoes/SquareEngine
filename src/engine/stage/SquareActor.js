@@ -29,6 +29,7 @@ class SquareActor extends SquareObject {
      * After the emitter is done, it will be destroyed automatically.
      *
      * @param {number} runtime The amount of frames this emitter should run for.
+     * @return {SquareParticleEmitter}
      */
     emitParticles(runtime) {
         let emitter = new SquareParticleEmitter();
@@ -37,6 +38,7 @@ class SquareActor extends SquareObject {
         emitter.emitterRuntime = runtime;
         SquareEngine.stage.addActor(emitter);
         emitter.start();
+        return emitter;
     }
 
     /**
