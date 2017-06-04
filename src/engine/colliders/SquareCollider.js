@@ -75,7 +75,12 @@ class SquareCollider extends SquareObject {
         this.rect.h = this.size.y;
 
         // If we receive collision, check for collision state
+        if (!this.collidingWith) {
+            this.collidingWith = [];
+        }
+
         let wasColliding = this.colliding;
+        let wasCollidingWith = this.collidingWith.slice();
 
         this.colliding = false;
         this.didCollide = false;
@@ -95,39 +100,40 @@ class SquareCollider extends SquareObject {
 
                 if (counterCollider.collidesWith(this)) {
                     this.colliding = true;
+                    this.collidingWith.push(counterActor);
 
                     if (!wasColliding) {
                         this.didCollide = true;
                     }
 
-                    this.collidingWith.push(counterActor);
+                    if (wasCollidingWith.indexOf(counterActor) === -1) {
+                        let fastestActorX;
+                        let fastestActorY;
+                        let slowestActorX;
+                        let slowestActorY;
 
-                    let fastestActorX;
-                    let fastestActorY;
-                    let slowestActorX;
-                    let slowestActorY;
+                        if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
+                            fastestActorX = counterActor;
+                            slowestActorX = this._actorTarget;
+                        } else {
+                            fastestActorX = this._actorTarget;
+                            slowestActorX = counterActor;
+                        }
 
-                    if (Math.abs(counterActor.velocity.x) > Math.abs(this._actorTarget.velocity.x)) {
-                        fastestActorX = counterActor;
-                        slowestActorX = this._actorTarget;
-                    } else {
-                        fastestActorX = this._actorTarget;
-                        slowestActorX = counterActor;
+                        if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
+                            fastestActorY = counterActor;
+                            slowestActorY = this._actorTarget;
+                        } else {
+                            fastestActorY = this._actorTarget;
+                            slowestActorY = counterActor;
+                        }
+
+                        slowestActorX.velocity.x = fastestActorX.velocity.x;
+                        fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
+
+                        slowestActorY.velocity.y = fastestActorX.velocity.y;
+                        fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                     }
-
-                    if (Math.abs(counterActor.velocity.y) > Math.abs(this._actorTarget.velocity.y)) {
-                        fastestActorY = counterActor;
-                        slowestActorY = this._actorTarget;
-                    } else {
-                        fastestActorY = this._actorTarget;
-                        slowestActorY = counterActor;
-                    }
-
-                    slowestActorX.velocity.x = fastestActorX.velocity.x;
-                    fastestActorX.velocity.x = (-fastestActorX.velocity.x / 2);
-
-                    slowestActorY.velocity.y = fastestActorX.velocity.y;
-                    fastestActorY.velocity.y = (-fastestActorY.velocity.y / 2);
                 }
             }
         }
