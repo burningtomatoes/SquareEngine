@@ -1283,6 +1283,8 @@ class SquareCollider extends SquareObject {
         this.collider.attachTo(this);
 
         this.isPlayer = false;
+
+        this.size = 32;
     }
 
     update(u) {
@@ -1303,7 +1305,7 @@ class SquareCollider extends SquareObject {
                 this.didInit = true;
             }
 
-            isNew =true;
+            isNew = true;
         }
 
         if (isNew) {
@@ -1346,6 +1348,22 @@ class SquareCollider extends SquareObject {
             emitter.emitterRuntime = 1;
             emitter.position.x += 12;
             emitter.position.y += 12;
+
+            for (let i = 0; i < this.collider.collidingWith.length; i++) {
+                let counterParty = this.collider.collidingWith[i];
+                counterParty.size -= 1;
+                this.size += 1;
+
+                if (counterParty.collider) {
+                    counterParty.collider.size.x--;
+                    counterParty.collider.size.y--;
+                }
+
+                if (this.collider) {
+                    this.collider.size.x++;
+                    this.collider.size.y++;
+                }
+            }
         }
     }
 
@@ -1357,6 +1375,6 @@ class SquareCollider extends SquareObject {
         super.draw(d);
 
         d.context.fillStyle = this.isPlayer ? '#ff0000' : '#fff';
-        d.context.fillRect(this.drawPosition.x, this.drawPosition.y, 32, 32);
+        d.context.fillRect(this.drawPosition.x, this.drawPosition.y, this.size, this.size);
     }
 }
