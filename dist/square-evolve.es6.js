@@ -631,6 +631,16 @@ class SquareStage extends SquareObject {
     }
 
     /**
+     * Gets a random actor on the stage.
+     *
+     * @returns {SquareActor}
+     */
+    getRandomActor() {
+        let actorIds = Object.keys(this.actors);
+        return this.actors[actorIds[actorIds.length * Math.random() << 0]];
+    }
+
+    /**
      * Adds an actor to the stage.
      * An ID will be generated and attached to the object.
      *
@@ -1343,15 +1353,18 @@ class SquareCollider extends SquareObject {
         super.update(u);
 
         if (this.isDead) {
-            let deathExplode = this.emitParticles(1);
-            deathExplode.emitterParticleSizeMin = 1;
-            deathExplode.emitterParticleSizeMax = 3;
-            deathExplode.emitterParticleAmountMin = 10;
-            deathExplode.emitterPersistent = true;
-            deathExplode.emitterParticleColor = this.color;
-            deathExplode.start();
+            if (this.id) {
+                let deathExplode = this.emitParticles(1);
+                deathExplode.emitterParticleSizeMin = 1;
+                deathExplode.emitterParticleSizeMax = 3;
+                deathExplode.emitterParticleAmountMin = 10;
+                deathExplode.emitterPersistent = true;
+                deathExplode.emitterParticleColor = this.color;
+                deathExplode.start();
 
-            this.remove();
+                this.remove();
+            }
+
             return;
         }
 
@@ -1395,8 +1408,57 @@ class SquareCollider extends SquareObject {
             }
         } else {
             if (!this.collider.colliding) {
-                this.velocity.y += SquareMath.rand(-10, +10) / 10;
-                this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+                // AI: FIND ANY TARGET, WE'RE A DUMB CUBE SO WE DON'T CARE WHAT IT IS
+                if (!this._aiTarget) {
+                    this._aiTarget = SquareEngine.stage.getRandomActor();
+                }
+
+                // AI: TARGET DEAD, OR NOT ON STAGE ANYMORE, OR OURSELVES, OR NO POS? WE DONE WITH IT, TRY AGAIN LATERS
+                if (!this._aiTarget || !this._aiTarget.id || this._aiTarget.isDead || this._aiTarget.id === this.id || !this._aiTarget.position) {
+                    this._aiTarget = null;
+                }
+
+                if (this._aiTarget) {
+                    // MOVEMENT: HOW FAST CAN WE MOVE PLEASE?
+                    let maxSpeedY = 5;
+                    let maxSpeedX = 5;
+
+                    let maxSpeedChangeY = 1;
+                    let maxSpeedChangeX = 1;
+
+                    // AI: MOVE TO OUR TARGET
+                    if (this._aiTarget.position.x > this.position.x) {
+                        this.velocity.x += maxSpeedChangeX;
+                    }
+
+                    if (this._aiTarget.position.x < this.position.x) {
+                        this.velocity.x -= maxSpeedChangeX;
+                    }
+
+                    if (this._aiTarget.position.y > this.position.y) {
+                        this.velocity.y += maxSpeedChangeY;
+                    }
+
+                    if (this._aiTarget.position.y < this.position.y) {
+                        this.velocity.y -= maxSpeedChangeY;
+                    }
+
+                    if (this.velocity.x <= -maxSpeedX) {
+                        this.velocity.x = -maxSpeedX;
+                    }
+
+                    if (this.velocity.x >= maxSpeedX) {
+                        this.velocity.x = maxSpeedX;
+                    }
+
+                    if (this.velocity.y <= -maxSpeedY) {
+                        this.velocity.y = -maxSpeedY;
+                    }
+
+                    if (this.velocity.y >= maxSpeedY) {
+                        this.velocity.y = maxSpeedY;
+                    }
+                }
             }
         }
 

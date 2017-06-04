@@ -45,6 +45,16 @@ class SquareStage extends SquareObject {
     }
 
     /**
+     * Gets a random actor on the stage.
+     *
+     * @returns {SquareActor}
+     */
+    getRandomActor() {
+        let actorIds = Object.keys(this.actors);
+        return this.actors[actorIds[actorIds.length * Math.random() << 0]];
+    }
+
+    /**
      * Adds an actor to the stage.
      * An ID will be generated and attached to the object.
      *

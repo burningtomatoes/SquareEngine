@@ -631,6 +631,16 @@ var SquareStage = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareStage,
     };
 
     /**
+     * Gets a random actor on the stage.
+     *
+     * @returns {SquareActor}
+     */
+    proto$0.getRandomActor = function() {
+        var actorIds = Object.keys(this.actors);
+        return this.actors[actorIds[actorIds.length * Math.random() << 0]];
+    };
+
+    /**
      * Adds an actor to the stage.
      * An ID will be generated and attached to the object.
      *
@@ -1343,15 +1353,18 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
         super$0.prototype.update.call(this, u);
 
         if (this.isDead) {
-            var deathExplode = this.emitParticles(1);
-            deathExplode.emitterParticleSizeMin = 1;
-            deathExplode.emitterParticleSizeMax = 3;
-            deathExplode.emitterParticleAmountMin = 10;
-            deathExplode.emitterPersistent = true;
-            deathExplode.emitterParticleColor = this.color;
-            deathExplode.start();
+            if (this.id) {
+                var deathExplode = this.emitParticles(1);
+                deathExplode.emitterParticleSizeMin = 1;
+                deathExplode.emitterParticleSizeMax = 3;
+                deathExplode.emitterParticleAmountMin = 10;
+                deathExplode.emitterPersistent = true;
+                deathExplode.emitterParticleColor = this.color;
+                deathExplode.start();
 
-            this.remove();
+                this.remove();
+            }
+
             return;
         }
 
@@ -1395,8 +1408,57 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
             }
         } else {
             if (!this.collider.colliding) {
-                this.velocity.y += SquareMath.rand(-10, +10) / 10;
-                this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+                // AI: FIND ANY TARGET, WE'RE A DUMB CUBE SO WE DON'T CARE WHAT IT IS
+                if (!this._aiTarget) {
+                    this._aiTarget = SquareEngine.stage.getRandomActor();
+                }
+
+                // AI: TARGET DEAD, OR NOT ON STAGE ANYMORE, OR OURSELVES, OR NO POS? WE DONE WITH IT, TRY AGAIN LATERS
+                if (!this._aiTarget || !this._aiTarget.id || this._aiTarget.isDead || this._aiTarget.id === this.id || !this._aiTarget.position) {
+                    this._aiTarget = null;
+                }
+
+                if (this._aiTarget) {
+                    // MOVEMENT: HOW FAST CAN WE MOVE PLEASE?
+                    var maxSpeedY = 5;
+                    var maxSpeedX = 5;
+
+                    var maxSpeedChangeY = 1;
+                    var maxSpeedChangeX = 1;
+
+                    // AI: MOVE TO OUR TARGET
+                    if (this._aiTarget.position.x > this.position.x) {
+                        this.velocity.x += maxSpeedChangeX;
+                    }
+
+                    if (this._aiTarget.position.x < this.position.x) {
+                        this.velocity.x -= maxSpeedChangeX;
+                    }
+
+                    if (this._aiTarget.position.y > this.position.y) {
+                        this.velocity.y += maxSpeedChangeY;
+                    }
+
+                    if (this._aiTarget.position.y < this.position.y) {
+                        this.velocity.y -= maxSpeedChangeY;
+                    }
+
+                    if (this.velocity.x <= -maxSpeedX) {
+                        this.velocity.x = -maxSpeedX;
+                    }
+
+                    if (this.velocity.x >= maxSpeedX) {
+                        this.velocity.x = maxSpeedX;
+                    }
+
+                    if (this.velocity.y <= -maxSpeedY) {
+                        this.velocity.y = -maxSpeedY;
+                    }
+
+                    if (this.velocity.y >= maxSpeedY) {
+                        this.velocity.y = maxSpeedY;
+                    }
+                }
             }
         }
 
