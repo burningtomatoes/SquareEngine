@@ -12,8 +12,17 @@ class GuyActor extends SquareActor {
         this.size = 32;
     }
 
+    get isDead() {
+        return this.size < 1;
+    }
+
     update(u) {
         super.update(u);
+
+        if (this.isDead) {
+            this.remove();
+            return;
+        }
 
         let isNew = false;
 
@@ -54,8 +63,10 @@ class GuyActor extends SquareActor {
                 this.velocity.y--;
             }
         } else {
-            this.velocity.y += SquareMath.rand(-10, +10) / 10;
-            this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            if (!this.collider.colliding) {
+                this.velocity.y += SquareMath.rand(-10, +10) / 10;
+                this.velocity.x -= SquareMath.rand(-10, +10) / 10;
+            }
         }
 
         this.velocity.x = SquareMath.lerp(this.velocity.x, 0, .05);
@@ -76,17 +87,27 @@ class GuyActor extends SquareActor {
 
             for (let i = 0; i < this.collider.collidingWith.length; i++) {
                 let counterParty = this.collider.collidingWith[i];
-                counterParty.size -= 1;
-                this.size += 1;
+                let impactSize = 1 + ((this.size - counterParty.size) / 10);
+
+                if (impactSize < 1) {
+                    impactSize = 1;
+                }
+
+                if (impactSize > counterParty.size) {
+                    impactSize = counterParty.size;
+                }
+
+                counterParty.size -= impactSize;
+                this.size += impactSize;
 
                 if (counterParty.collider) {
-                    counterParty.collider.size.x--;
-                    counterParty.collider.size.y--;
+                    counterParty.collider.size.x -= impactSize;
+                    counterParty.collider.size.y -= impactSize;
                 }
 
                 if (this.collider) {
-                    this.collider.size.x++;
-                    this.collider.size.y++;
+                    this.collider.size.x += impactSize;
+                    this.collider.size.y += impactSize;
                 }
             }
         }
