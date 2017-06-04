@@ -15,4 +15,16 @@ $(document).ready(function () {
     let ourPlayer = SquareEngine.stage.getActorById(321);
     SquareEngine.camera.attachTo(ourPlayer);
     ourPlayer.isPlayer = true;
+
+    ourPlayer.update(SquareEngine.updateContext);
+
+    let particleTest = new SquareParticleEmitter();
+    particleTest.emitterRuntime = Infinity;
+    particleTest.emitterParticleAmountMin = 0;
+    particleTest.emitterParticleAmountMax = Infinity;
+    particleTest.emitterParticleColor = '#ff0000';
+    particleTest.position = ourPlayer.position.clone();
+    particleTest.start();
+
+    SquareEngine.stage.addActor(particleTest);
 });

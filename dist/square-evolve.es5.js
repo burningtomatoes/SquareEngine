@@ -1120,17 +1120,31 @@ MIXIN$0(SquareKeyboard.prototype,proto$0);proto$0=void 0;return SquareKeyboard;}
 
         this.velocity.x = SquareMath.rand(-5, +5);
         this.velocity.y = SquareMath.rand(-5, +5);
-        this.size = 14;
-    }if(super$0!==null)SP$0(SquareParticle,super$0);SquareParticle.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":SquareParticle,"configurable":true,"writable":true}});DP$0(SquareParticle,"prototype",{"configurable":false,"enumerable":false,"writable":false});
+        this.size = 6;
+        this.color = '#fff';
+    }if(super$0!==null)SP$0(SquareParticle,super$0);SquareParticle.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":SquareParticle,"configurable":true,"writable":true}, isComplete: {"get": $isComplete_get$0, "configurable":true,"enumerable":true}});DP$0(SquareParticle,"prototype",{"configurable":false,"enumerable":false,"writable":false});
+
+    function $isComplete_get$0() {
+        return this.size < 1;
+    }
 
     proto$0.update = function(u) {
+        if (this.isComplete) {
+            return;
+        }
+
         super$0.prototype.update.call(this, u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.2);
+        this.size = SquareMath.lerp(this.size, 0, 0.1);
     };
 
     proto$0.draw = function(d) {
-        d.context.fillStyle = '#fff';
+        if (this.isComplete) {
+            // Done, nothing to draw
+            return;
+        }
+
+        d.context.fillStyle = this.color;
         d.context.fillRect(this.position.x, this.position.y, this.size, this.size);
     };
 MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;})(SquareActor);;var SquareParticleEmitter = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(SquareParticleEmitter, super$0);var proto$0={};
@@ -1140,10 +1154,15 @@ MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;}
         this.particles = [];
 
         this.emitterStarted = false;
-        this.emitterRuntime = 10;
+        this.emitterRuntime = Infinity;
         this.emitterRemoveOnStop = true;
         this.emitterParticleType = SquareParticle;
         this.emitterParticleAmount = 1;
+        this.emitterParticleAmountMin = 0;
+        this.emitterParticleAmountMax = 20;
+        this.emitterParticleColor = '#ffffff';
+        this.emitterParticleSizeMin = 4;
+        this.emitterParticleSizeMax = 6;
     }if(super$0!==null)SP$0(SquareParticleEmitter,super$0);SquareParticleEmitter.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":SquareParticleEmitter,"configurable":true,"writable":true}});DP$0(SquareParticleEmitter,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
     proto$0.start = function() {
@@ -1155,46 +1174,71 @@ MIXIN$0(SquareParticle.prototype,proto$0);proto$0=void 0;return SquareParticle;}
             SquareDiagnostics.logDebug('Debug warning: Starting particle emitter that has no runtime remaining');
         }
 
+        this.particles = [];
         this.emitterStarted = true;
     };
 
     proto$0.stop = function() {
-        this.emitterStarted = false;
+        if (this.emitterStarted) {
+            this.emitterStarted = false;
+        }
 
-        if (this.emitterRemoveOnStop) {
+        if (this.emitterRemoveOnStop && this.particles.length === 0) {
             this.remove();
         }
     };
 
     proto$0.update = function(u) {
-        if (!this.emitterStarted) {
-            return;
-        }
-
-        if (this.emitterRuntime <= 0) {
-            this.stop();
-            return;
-        }
-
-        for (var pI = 0; pI < this.emitterParticleAmount; pI++) {
-            var newParticle = new this.emitterParticleType;
-            newParticle.position = new SquareCoordinate(this.position.x, this.position.y);
-
-            this.particles.push(newParticle);
-        }
-
+        // Update all existing particles
         for (var i = 0; i < this.particles.length; i++) {
             this.particles[i].update(u);
         }
 
+        // Clean up dead particles
+        var remainingParticles = [];
+
+        for (var i$0 = 0; i$0 < this.particles.length; i$0++) {
+            var particle = this.particles[i$0];
+
+            if (particle.isComplete) {
+                continue;
+            }
+
+            remainingParticles.push(particle);
+        }
+
+        this.particles = remainingParticles;
+
+        // If the emitter is not running or has "expired", call stop to clean ourselves up if needed
+        if (!this.emitterStarted || this.emitterRuntime <= 0) {
+            this.stop();
+            return;
+        }
+
+        // Spawn new particles within the bounds of our config
+        var particlesToGenerate = this.emitterParticleAmount;
+
+        if (this.particles.length + particlesToGenerate < this.emitterParticleAmountMin) {
+            particlesToGenerate = this.emitterParticleAmountMin;
+        }
+
+        for (var iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
+        this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
+            var newParticle = new this.emitterParticleType;
+            newParticle.color = this.emitterParticleColor;
+            newParticle.position = this.position.clone();
+            newParticle.size = SquareMath.rand(this.emitterParticleSizeMin, this.emitterParticleSizeMax);
+
+            this.particles.push(newParticle);
+
+            newParticle.update(u);
+        }
+
+        // Decrement remaining time
         this.emitterRuntime--;
     };
 
     proto$0.draw = function(d) {
-        if (!this.emitterStarted) {
-            return;
-        }
-
         for (var i = 0; i < this.particles.length; i++) {
             this.particles[i].draw(d);
         }
@@ -1216,6 +1260,18 @@ MIXIN$0(SquareParticleEmitter.prototype,proto$0);proto$0=void 0;return SquarePar
     var ourPlayer = SquareEngine.stage.getActorById(321);
     SquareEngine.camera.attachTo(ourPlayer);
     ourPlayer.isPlayer = true;
+
+    ourPlayer.update(SquareEngine.updateContext);
+
+    var particleTest = new SquareParticleEmitter();
+    particleTest.emitterRuntime = Infinity;
+    particleTest.emitterParticleAmountMin = 0;
+    particleTest.emitterParticleAmountMax = Infinity;
+    particleTest.emitterParticleColor = '#ff0000';
+    particleTest.position = ourPlayer.position.clone();
+    particleTest.start();
+
+    SquareEngine.stage.addActor(particleTest);
 });;var GuyActor = (function(super$0){"use strict";if(!PRS$0)MIXIN$0(GuyActor, super$0);var proto$0={};
     function GuyActor() {
         super$0.call(this);

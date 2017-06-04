@@ -1120,17 +1120,31 @@ class SquareCollider extends SquareObject {
 
         this.velocity.x = SquareMath.rand(-5, +5);
         this.velocity.y = SquareMath.rand(-5, +5);
-        this.size = 14;
+        this.size = 6;
+        this.color = '#fff';
+    }
+
+    get isComplete() {
+        return this.size < 1;
     }
 
     update(u) {
+        if (this.isComplete) {
+            return;
+        }
+
         super.update(u);
 
-        this.size = SquareMath.lerp(this.size, 0, 0.2);
+        this.size = SquareMath.lerp(this.size, 0, 0.1);
     }
 
     draw(d) {
-        d.context.fillStyle = '#fff';
+        if (this.isComplete) {
+            // Done, nothing to draw
+            return;
+        }
+
+        d.context.fillStyle = this.color;
         d.context.fillRect(this.position.x, this.position.y, this.size, this.size);
     }
 };class SquareParticleEmitter extends SquareActor {
@@ -1140,10 +1154,15 @@ class SquareCollider extends SquareObject {
         this.particles = [];
 
         this.emitterStarted = false;
-        this.emitterRuntime = 10;
+        this.emitterRuntime = Infinity;
         this.emitterRemoveOnStop = true;
         this.emitterParticleType = SquareParticle;
         this.emitterParticleAmount = 1;
+        this.emitterParticleAmountMin = 0;
+        this.emitterParticleAmountMax = 20;
+        this.emitterParticleColor = '#ffffff';
+        this.emitterParticleSizeMin = 4;
+        this.emitterParticleSizeMax = 6;
     }
 
     start() {
@@ -1155,46 +1174,71 @@ class SquareCollider extends SquareObject {
             SquareDiagnostics.logDebug('Debug warning: Starting particle emitter that has no runtime remaining');
         }
 
+        this.particles = [];
         this.emitterStarted = true;
     }
 
     stop() {
-        this.emitterStarted = false;
+        if (this.emitterStarted) {
+            this.emitterStarted = false;
+        }
 
-        if (this.emitterRemoveOnStop) {
+        if (this.emitterRemoveOnStop && this.particles.length === 0) {
             this.remove();
         }
     }
 
     update(u) {
-        if (!this.emitterStarted) {
-            return;
-        }
-
-        if (this.emitterRuntime <= 0) {
-            this.stop();
-            return;
-        }
-
-        for (let pI = 0; pI < this.emitterParticleAmount; pI++) {
-            let newParticle = new this.emitterParticleType;
-            newParticle.position = new SquareCoordinate(this.position.x, this.position.y);
-
-            this.particles.push(newParticle);
-        }
-
+        // Update all existing particles
         for (let i = 0; i < this.particles.length; i++) {
             this.particles[i].update(u);
         }
 
+        // Clean up dead particles
+        let remainingParticles = [];
+
+        for (let i = 0; i < this.particles.length; i++) {
+            let particle = this.particles[i];
+
+            if (particle.isComplete) {
+                continue;
+            }
+
+            remainingParticles.push(particle);
+        }
+
+        this.particles = remainingParticles;
+
+        // If the emitter is not running or has "expired", call stop to clean ourselves up if needed
+        if (!this.emitterStarted || this.emitterRuntime <= 0) {
+            this.stop();
+            return;
+        }
+
+        // Spawn new particles within the bounds of our config
+        let particlesToGenerate = this.emitterParticleAmount;
+
+        if (this.particles.length + particlesToGenerate < this.emitterParticleAmountMin) {
+            particlesToGenerate = this.emitterParticleAmountMin;
+        }
+
+        for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
+        this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
+            let newParticle = new this.emitterParticleType;
+            newParticle.color = this.emitterParticleColor;
+            newParticle.position = this.position.clone();
+            newParticle.size = SquareMath.rand(this.emitterParticleSizeMin, this.emitterParticleSizeMax);
+
+            this.particles.push(newParticle);
+
+            newParticle.update(u);
+        }
+
+        // Decrement remaining time
         this.emitterRuntime--;
     }
 
     draw(d) {
-        if (!this.emitterStarted) {
-            return;
-        }
-
         for (let i = 0; i < this.particles.length; i++) {
             this.particles[i].draw(d);
         }
@@ -1216,6 +1260,18 @@ class SquareCollider extends SquareObject {
     let ourPlayer = SquareEngine.stage.getActorById(321);
     SquareEngine.camera.attachTo(ourPlayer);
     ourPlayer.isPlayer = true;
+
+    ourPlayer.update(SquareEngine.updateContext);
+
+    let particleTest = new SquareParticleEmitter();
+    particleTest.emitterRuntime = Infinity;
+    particleTest.emitterParticleAmountMin = 0;
+    particleTest.emitterParticleAmountMax = Infinity;
+    particleTest.emitterParticleColor = '#ff0000';
+    particleTest.position = ourPlayer.position.clone();
+    particleTest.start();
+
+    SquareEngine.stage.addActor(particleTest);
 });;class GuyActor extends SquareActor {
     constructor() {
         super();
