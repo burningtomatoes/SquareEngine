@@ -9,6 +9,8 @@ class SquareParticleEmitter extends SquareActor {
         this.emitterRemoveOnStop = true;
         this.emitterParticleType = SquareParticle;
         this.emitterParticleAmount = 1;
+        this.emitterParticleAmountMin = 0;
+        this.emitterParticleAmountMax = 10;
     }
 
     start() {
@@ -41,7 +43,14 @@ class SquareParticleEmitter extends SquareActor {
             return;
         }
 
-        for (let pI = 0; pI < this.emitterParticleAmount; pI++) {
+        let particlesToGenerate = this.emitterParticleAmount;
+
+        if (this.particles.length + particlesToGenerate < this.emitterParticleAmountMin) {
+            particlesToGenerate = this.emitterParticleAmountMin;
+        }
+
+        for (let iNewPart = 0; iNewPart < particlesToGenerate && this.particles.length >=
+        this.emitterParticleAmountMin && this.particles.length <= this.emitterParticleAmountMax; iNewPart++) {
             let newParticle = new this.emitterParticleType;
             newParticle.position = new SquareCoordinate(this.position.x, this.position.y);
 
